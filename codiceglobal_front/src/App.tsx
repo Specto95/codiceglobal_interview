@@ -1,35 +1,81 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { lazy, Suspense } from "react";
+import "./App.css";
+import { Route, Routes } from "react-router-dom";
+
+import { Navbar } from "./components/CatalogueProducts/Navbar/Navbar";
+import { ProtectedRoute } from "./pages/ProtectedRoutes/ProtectedRoute";
+import { PublicRoute } from "./pages/PublicRoutes/PublicRoutes";
+
+const CatalogueProductsView = lazy(() =>
+  import("./components/CatalogueProducts/CatalogueProductsView").then(
+    (module) => ({
+      default: module.CatalogueProductsView,
+    })
+  )
+);
+
+const Login = lazy(() =>
+  import("./components/Auth/Login/Login").then((module) => ({
+    default: module.Login,
+  }))
+);
+
+const CreateRole = lazy(() =>
+  import("./pages/Roles/Create/CreateRole").then((module) => ({
+    default: module.CreateRole,
+  }))
+);
+
+const ChangePassword = lazy(() =>
+  import("./pages/ChangePassword/ChangePassword").then((module) => ({
+    default: module.ChangePassword,
+  }))
+);
+
+const ForgotPassword = lazy(() =>
+  import("./pages/ForgotPassword/ForgotPassword").then((module) => ({
+    default: module.ForgotPassword,
+  }))
+);
+
+const ResetPassword = lazy(() =>
+  import("./pages/ForgotPassword/ResetPassword/ResetPassword").then(
+    (module) => ({
+      default: module.ResetPassword,
+    })
+  )
+);
+
+const NotFound = lazy(() =>
+  import("./pages/NotFound/NotFound").then((module) => ({
+    default: module.NotFound,
+  }))
+);
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Suspense fallback={<div>Loading...</div>}>
+      <Navbar />
+      <Routes>
+        {/* Public routes */}
+
+        <Route element={<PublicRoute />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+        </Route>
+
+        {/* Protected routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<CatalogueProductsView />} />
+          <Route path="/create-role" element={<CreateRole />} />
+          <Route path="/change-password" element={<ChangePassword />} />
+        </Route>
+
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Suspense>
+  );
 }
 
-export default App
+export default App;

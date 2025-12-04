@@ -1,0 +1,206 @@
+import {
+  validateChangePassword,
+  validateRegister,
+} from "./validations/authValidations.mjs";
+
+export class AuthController {
+  constructor({ authModel }) {
+    this.authModel = authModel;
+  }
+
+  createUser = async (req, res) => {
+    const result = validateRegister(req.body);
+
+    if (!result.success) {
+      return res.status(422).json({
+        message: JSON.stringify(result.error.message),
+        errors: result.error.errors,
+      });
+    }
+
+    try {
+      const registerResult = await this.authModel.createUser({
+        input: result.data,
+      });
+
+      res.status(201).json({
+        message: "Usuario registrado exitosamente",
+        user: registerResult,
+      });
+    } catch (error) {
+      res.status(error.statusCode || 500).json({
+        message: error.message || "Error al registrar usuario",
+      });
+    }
+  };
+
+  isEmailAvailable = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+      const user = await this.authModel.isEmailAvailable({ email });
+
+      res.status(200).json({
+        message: !user,
+      });
+    } catch (error) {
+      // console.error("Error al validar email:", error);
+
+      return res.status(error.statusCode || 500).json({
+        message: error.message || "Error al validar email",
+      });
+    }
+  };
+
+  login = async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+      const { token, user } = await this.authModel.login({ email, password });
+
+      return res.status(200).json({
+        message: "Inicio de sesión exitoso",
+        token,
+        user,
+      });
+    } catch (error) {
+      // console.error("Error en login:", error);
+
+      return res.status(error.statusCode || 500).json({
+        message: error.message || "Error en el inicio de sesión",
+      });
+    }
+  };
+
+  logout = async (req, res) => {
+    const authHeader = req.get("Authorization");
+    const token = authHeader.split(" ")[1];
+
+    try {
+      await this.authModel.logout({ token });
+      res.status(200).json({ message: "Logout successful" });
+    } catch (error) {
+      // console.error("Error de logout:", error);
+
+      return res.status(error.statusCode || 500).json({
+        message: error.message || "Error al salir de sesión",
+      });
+    }
+  };
+
+  forgotPassword = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+      const { user } = await this.authModel.forgotPassword({ email });
+      res.status(201).json({
+        message:
+          "Instrucciones para restablecer la contraseña enviadas al correo",
+        user,
+      });
+    } catch (error) {
+      // console.error("Error de recuperación contraseña", error);
+
+      return res.status(error.statusCode || 500).json({
+        message: error.message || "Error de recuperación contraseña",
+      });
+    }
+  };
+
+  isValidOldPassword = async (req, res) => {
+    try {
+      const { oldPassword } = req.body;
+      const user = req.foundUser;
+
+      await this.authModel.isValidOldPassword({
+        user,
+        oldPassword,
+      });
+
+      return res.status(200).json({
+        message: true,
+      });
+    } catch (error) {
+      return res.status(error.statusCode || 500).json({
+        message: error.message || "Error al verificar contraseña antigua",
+      });
+    }
+  };
+
+  changePassword = async (req, res) => {
+    const { oldPassword, newPassword } = req.body;
+    const user = req.foundUser;
+    try {
+      const result = validateChangePassword(req.body);
+
+      if (!result.success) {
+        return res.status(422).json({
+          message: JSON.parse(result.error.message),
+          errors: result.error.errors,
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+
+    try {
+      const changePasswordResult = await this.authModel.changePassword({
+        user,
+        oldPassword,
+        newPassword,
+      });
+
+      return res.status(200).json({
+        message: "Contraseña cambiada exitosamente",
+        user: changePasswordResult,
+      });
+    } catch (error) {
+      return res.status(error.statusCode || 500).json({
+        message: error.message || "Error al verificar contraseña antigua",
+      });
+    }
+  };
+
+  resetPassword = async (req, res) => {
+    const { email, newPassword } = req.body;
+
+    try {
+      const resetPasswordResult = await this.authModel.resetPassword({
+        email,
+        newPassword,
+      });
+      res.status(201).json({
+        message: "Contraseña restablecida exitosamente",
+        user: resetPasswordResult,
+      });
+    } catch (error) {
+      return res.status(error.statusCode || 500).json({
+        message: error.message || "Error al verificar contraseña antigua",
+      });
+    }
+  };
+
+  isUserAuthenticated = async (req, res) => {
+    if (req.isAuth) {
+      res.status(200).send(true);
+      return;
+    }
+    res.status(401).send(false);
+  };
+
+  isRegisteredEmail = async (req, res) => {
+    const { email } = req.body;
+    try {
+      const isRegisteredEmailResult = await this.authModel.isRegisteredEmail({
+        email,
+      });
+      return res.status(isRegisteredEmailResult ? 200 : 404).json({
+        message: isRegisteredEmailResult,
+      });
+    } catch (error) {
+      return res.status(error.statusCode || 500).json({
+        message: error.message || "Error al verificar contraseña antigua",
+      });
+    }
+  };
+}
