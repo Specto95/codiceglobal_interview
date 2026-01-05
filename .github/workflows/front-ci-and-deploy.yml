@@ -35,12 +35,13 @@ jobs:
           run: pnpm test
           working-directory: codiceglobal_front
 
+        - name: Deploy in Heroku
+          run: |
+            curl https://cli-assets.heroku.com/install.sh | sh
+
         - name: Set Heroku buildpack to Node.js
           run: heroku buildpacks:set heroku/nodejs --app ${{secrets.HEROKU_APP}}
         
-        - name: Deploy in Heroku
-          run: |
-            curl https://cli-assets.heroku.com/install.sh | sh 
         - uses: akhileshns/heroku-deploy@v3.14.15
           with:
             heroku_api_key: ${{secrets.HEROKU_API_KEY}}
