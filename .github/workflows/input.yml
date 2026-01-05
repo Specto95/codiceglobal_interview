@@ -1,6 +1,8 @@
 name: Input test
 
 on:
+  push:
+
   workflow_dispatch:
     inputs:
       logLevel:
@@ -20,6 +22,7 @@ on:
         description: 'Environment to run tests against'
         required: true
         type: environment
+      
 
 jobs:
   log-the-inputs:

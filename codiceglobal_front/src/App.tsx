@@ -55,6 +55,7 @@ const NotFound = lazy(() =>
 function App() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
+      <h1>Loading..</h1>
       <Navbar />
       <Routes>
         {/* Public routes */}

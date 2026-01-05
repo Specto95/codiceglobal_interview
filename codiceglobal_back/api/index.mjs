@@ -17,6 +17,10 @@ export const createApp = ({ productModel, authModel }) => {
     res.send("<h1>Bienvenido</h1>");
   });
 
+  app.get('/health', (_, res) => {
+    res.status(200).send('OK');
+  })
+
   // PRODUCTS
   app.use("/auth", createAuthRouter({ authModel }));
   app.use("/products", createProductsRouter({ productModel }));
