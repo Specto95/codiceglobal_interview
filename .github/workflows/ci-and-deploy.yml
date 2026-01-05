@@ -27,7 +27,15 @@ jobs:
 
       - name: Install deps
         working-directory: codiceglobal_back/api
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
+
+      - name: Sanity check backend can start
+        working-directory: codiceglobal_back/api
+        run: |
+          echo "Testing backend startup..."
+          node server-with-local.mjs &
+          sleep 5
+          kill $!
 
       - name: Build backend
         working-directory: codiceglobal_back/api
@@ -40,7 +48,7 @@ jobs:
       - name: Set Heroku buildpack to Node.js
         run: heroku buildpacks:set heroku/nodejs --app ${{secrets.HEROKU_BACK_APP}}
 
-      - name: Deploy backend
+      - name: Deploy backend to Heroku
         uses: akhileshns/heroku-deploy@v3.14.15
         with:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
