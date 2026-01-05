@@ -47,7 +47,7 @@ jobs:
           heroku_app_name: ${{ secrets.HEROKU_BACK_APP }}
           heroku_email: ${{ secrets.HEROKU_EMAIL }}
           appdir: codiceglobal_back/api
-          healthcheck: "https://${{secrets.HEROKU_BACK_APP}}/health"
+          healthcheck: "https://${{secrets.HEROKU_BACK_APP}}-${{secrets.HEROKU_BACK_DOMAIN}}/health"
           rollbackonhealthcheckfailed: true
 
   deploy-frontend:
