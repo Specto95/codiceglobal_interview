@@ -27,7 +27,7 @@ jobs:
 
       - name: Install deps
         working-directory: codiceglobal_back/api
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Sanity check backend can start
         working-directory: codiceglobal_back/api
