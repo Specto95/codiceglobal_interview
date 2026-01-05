@@ -6,8 +6,9 @@
   "main": "index.mjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon --env-file=.env index.mjs",
-    "start:local": "nodemon --env-file=.env server-with-local.mjs"
+    "start": "node server-with-local.mjs",
+    "dev": "nodemon --env-file=.env server-with-local.mjs",
+    "start:local": "nodemon --env-file=.env index.mjs"
   },
   "keywords": [],
   "author": "Enrique Ortiz",

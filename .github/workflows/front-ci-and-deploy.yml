@@ -3,6 +3,10 @@ on:
     push:
         branches:
         - main
+    pull_request:
+        branches:
+        - main
+        types: [opened, synchronize, closed]
 jobs:
     build-and-deploy-front:
         runs-on: ubuntu-latest
@@ -48,7 +52,4 @@ jobs:
             heroku_app_name: ${{secrets.HEROKU_APP}}
             heroku_email: ${{secrets.HEROKU_EMAIL}}
             appdir: codiceglobal_front
-            # healthcheck: "https://${{secrets.HEROKU_APP}}/health"
-            # rollbackonhealthcheckfailed: true
-        
         
