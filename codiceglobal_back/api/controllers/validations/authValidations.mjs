@@ -59,7 +59,7 @@ const changePasswordBaseSchema = z.object({
   }),
 });
 
-export const oldPasswordSchema = changePasswordSchema.pick({
+export const oldPasswordSchema = changePasswordBaseSchema.pick({
   email: true,
   oldPassword: true,
 });
