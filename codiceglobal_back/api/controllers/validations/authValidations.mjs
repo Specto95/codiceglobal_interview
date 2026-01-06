@@ -29,37 +29,43 @@ export const registerSchema = z.object({
   ),
 });
 
-export const changePasswordSchema = z
-  .object({
-    email: z
-      .string({
-        invalid_type_error: "Email must be a string",
-        required_error: "Email is required.",
-      })
-      .email(),
-    oldPassword: z.string({
+const changePasswordBaseSchema = z.object({
+  email: z
+    .string({
+      invalid_type_error: "Email must be a string",
+      required_error: "Email is required.",
+    })
+    .email(),
+  oldPassword: z.string({
+    invalid_type_error: "Password must be a string",
+    required_error: "Password is required.",
+  }),
+  newPassword: z
+    .string({
       invalid_type_error: "Password must be a string",
       required_error: "Password is required.",
+    })
+    .min(8, { message: "Password must be at least 8 characters long" })
+    .regex(/^(?=.*[a-z])(?=.*[A-Z]).*$/, {
+      message:
+        "Password must contain at least one uppercase and one lowercase letter",
+    })
+    .regex(/^(?=.*[!@#$%^&*(),.?\":{}|<>])/, {
+      message: "Password must contain at least one special character",
     }),
-    newPassword: z
-      .string({
-        invalid_type_error: "Password must be a string",
-        required_error: "Password is required.",
-      })
-      .min(8, { message: "Password must be at least 8 characters long" })
-      .regex(/^(?=.*[a-z])(?=.*[A-Z]).*$/, {
-        message:
-          "Password must contain at least one uppercase and one lowercase letter",
-      })
-      .regex(/^(?=.*[!@#$%^&*(),.?\":{}|<>])/, {
-        message: "Password must contain at least one special character",
-      }),
-    confirmNewPassword: z.string({
-      invalid_type_error: "Confirm password must be a string",
-      required_error: "Confirm password is required.",
-    }),
-  })
-  .superRefine((data, ctx) => {
+  confirmNewPassword: z.string({
+    invalid_type_error: "Confirm password must be a string",
+    required_error: "Confirm password is required.",
+  }),
+});
+
+export const oldPasswordSchema = changePasswordSchema.pick({
+  email: true,
+  oldPassword: true,
+});
+
+export const changePasswordSchema = changePasswordBaseSchema.superRefine(
+  (data, ctx) => {
     if (data.newPassword !== data.confirmNewPassword) {
       ctx.addIssue({
         code: "mismatch",
@@ -67,12 +73,8 @@ export const changePasswordSchema = z
         path: ["confirmNewPassword"],
       });
     }
-  });
-
-export const oldPasswordSchema = changePasswordSchema.pick({
-  email: true,
-  oldPassword: true,
-});
+  }
+);
 
 export function validateRegister(object) {
   return registerSchema.safeParse(object);
